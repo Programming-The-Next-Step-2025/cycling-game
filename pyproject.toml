@@ -3,7 +3,7 @@ requires = ["hatchling >= 1.26"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["cycling_game"]
+packages = ["src/cycling_game"]
 
 [project]
 name = "cycling_game"
