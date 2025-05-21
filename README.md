@@ -1,1 +1,2 @@
 # cycling-game
+This is meant as a small arcade like game or SubwaySurfer clone, where you play as a cyclist in the Netherlands. The goal is to gain as many points as possible by running over tourists trying to cross the bikepaths. You can collect coins and try and upgrade your bike to run over more tourists and get further in the game. Maps will be procedually generated and runs do not have an end but the run ends when the player crashes into other cyclists or a construction site.
