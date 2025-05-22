@@ -29,13 +29,14 @@ class Game:
         
         # -- Assets Library -- 
         self.assets = {
-            "player": load_image("player_sprite.png"),
+            "player": load_image("player.png"),
             "background": load_image("background.png"),
             "obstacle": load_image("obstacle_rm.png")
         }
+        
         self.bg = pygame.transform.scale(self.assets["background"], self.screen.get_size())
         self.player = PhysicsEntity(self, "player", SPAWN_POSITION, (8,15))
-        self.player.scale((70, 70))
+        self.player.scale((90, 90))
         
         #Creating Movement
         self.movement = [False, False]

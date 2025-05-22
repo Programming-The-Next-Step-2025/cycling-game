@@ -1,4 +1,5 @@
 import pygame
+from cycling_game.animation import get_animation_list
 
 class PhysicsEntity:
     def __init__(self, game, e_type, pos, size):
@@ -7,22 +8,39 @@ class PhysicsEntity:
         self.pos = list(pos) 
         self.size = size
         self.velocity = [0, 0]
-        self.image = self.game.assets["player"]
+
+        self.animation = get_animation_list()
+        self.current_frame = 0
+        self.last_update = pygame.time.get_ticks()
+        self.framerate = 60
+
+        self.image = self.animation[self.current_frame]
+        
 
         self.rect = pygame.Rect(self.pos[0], self.pos[1], size[0], size[1])
         
     def update(self, movement = (0, 0)):
+        # Update the animation frame
+        now = pygame.time.get_ticks()
+        if now - self.last_update > self.framerate:
+            self.last_update = now
+            self.current_frame = (self.current_frame + 1) % len(self.animation)
+            self.image = self.animation[self.current_frame]
+
+        # Update the player movement
         frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1])
 
         self.pos[0] += frame_movement[0]
         self.pos[1] += frame_movement[1]
-        self.rect.topleft = (self.pos[0] + 5, self.pos[1] + 32) # Manual adjustments to have the hitbox only over the bike
+        self.rect.topleft = (self.pos[0] + 5, self.pos[1] + 41) # Manual adjustments to have the hitbox only over the bike
 
     def render(self, surf):
         surf.blit(self.image, self.pos)
-        pygame.draw.rect(surf, (0,0,100), self.rect)
+        #pygame.draw.rect(surf, (0,0,100), self.rect)
 
     def scale(self, new_size):
+        self.animation = [pygame.transform.scale(frame, new_size) for frame in self.animation]
+        
         self.image = pygame.transform.scale(self.game.assets["player"], new_size)
         self.rect.size = new_size[0] * 0.9, new_size[1] / 2
 
