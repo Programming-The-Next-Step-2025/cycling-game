@@ -54,7 +54,7 @@ class Game:
         # Spawn in Obstacles, dependent on time interval
         self.obstacles = []
         self.last_spawn = pygame.time.get_ticks()
-        self.spawn_delay = 2000
+        self.spawn_delay = 5000
         
 
     #Creating the game loop as a function of the game class
@@ -81,8 +81,7 @@ class Game:
             if pygame.time.get_ticks() - self.last_speed_increase_time >= 10000:
                 self.speed += 1
                 self.last_speed_increase_time = pygame.time.get_ticks()
-            # pygame.draw.rect(self.screen, (255, 0, 0), self.down_border)
-            # pygame.draw.rect(self.screen, (0, 200, 0), self.player.rect)
+            
             self.player.update((0, (self.movement[1] - self.movement[0]) * SPEED))
             self.player.render(self.screen)
             

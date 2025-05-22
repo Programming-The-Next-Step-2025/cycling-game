@@ -8,22 +8,23 @@ class PhysicsEntity:
         self.size = size
         self.velocity = [0, 0]
         self.image = self.game.assets["player"]
-        self.rect = pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
 
-
+        self.rect = pygame.Rect(self.pos[0], self.pos[1], size[0], size[1])
+        
     def update(self, movement = (0, 0)):
         frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1])
 
         self.pos[0] += frame_movement[0]
         self.pos[1] += frame_movement[1]
-        self.rect.topleft = (self.pos[0], self.pos[1])
+        self.rect.topleft = (self.pos[0] + 5, self.pos[1] + 32) # Manual adjustments to have the hitbox only over the bike
 
     def render(self, surf):
         surf.blit(self.image, self.pos)
+        pygame.draw.rect(surf, (0,0,100), self.rect)
 
     def scale(self, new_size):
         self.image = pygame.transform.scale(self.game.assets["player"], new_size)
-        self.rect.size = new_size
+        self.rect.size = new_size[0] * 0.9, new_size[1] / 2
 
 class Obstacle:
     def __init__(self, game, sprite_key, position, size):
