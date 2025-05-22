@@ -1,8 +1,8 @@
 import pygame
 import sys
-from cycling_game.entities import PhysicsEntity
+from cycling_game.entities import *
 from cycling_game.utils import *
-
+import random
 # -------- Settings ---------
 FRAMERATE = 60
 WINDOW_SIZE = (1000, 480)
@@ -19,7 +19,7 @@ class Game:
     def __init__(self):
 
         pygame.init()
-        self.screen = pygame.display.set_mode(WINDOW_SIZE)
+        self.screen = pygame.display.set_mode(WINDOW_SIZE, pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.SCALED, vsync=1)
 
         #Scale up the screen to scale the sprites
         #self.display = pygame.Surface(scale_screen_up(1, window_size = WINDOW_SIZE))
@@ -31,7 +31,7 @@ class Game:
         self.assets = {
             "player": load_image("player_sprite.png"),
             "background": load_image("background.png"),
-            "obstacle": load_image("obstacle.png")
+            "obstacle": load_image("obstacle_rm.png")
         }
         self.bg = pygame.transform.scale(self.assets["background"], self.screen.get_size())
         self.player = PhysicsEntity(self, "player", SPAWN_POSITION, (8,15))
@@ -44,12 +44,18 @@ class Game:
 
         self.up_border = pygame.Rect(0, 320, self.screen.get_width(), 10)
         self.down_border = pygame.Rect(0, (self.screen.get_height() - 2), self.screen.get_width(), 1)
-       
+
         # Create the endless background animation
         self.scroll = 0
         self.speed = 1
         self.start_time = pygame.time.get_ticks()
         self.last_speed_increase_time = self.start_time
+
+        # Spawn in Obstacles, dependent on time interval
+        self.obstacles = []
+        self.last_spawn = pygame.time.get_ticks()
+        self.spawn_delay = 2000
+        
 
     #Creating the game loop as a function of the game class
     def run(self):
@@ -65,7 +71,7 @@ class Game:
                 x_pos = i * self.bg.get_width() + self.scroll
                 if -self.bg.get_width() < x_pos < self.screen.get_width():
                     self.screen.blit(self.bg, (x_pos, 0))
-                
+                  
             self.scroll -= self.speed
 
             if abs(self.scroll) >= self.bg.get_width():
@@ -80,17 +86,41 @@ class Game:
             self.player.update((0, (self.movement[1] - self.movement[0]) * SPEED))
             self.player.render(self.screen)
             
-            # Collision Mechanics
+            # Keeping the player in bound
             if self.player.rect.colliderect(self.up_border) and self.player.rect.bottom <= (self.up_border.bottom + 10):
                 
                 self.movement[0] = False
                 self.player.pos[1] += 1
-
             if self.player.rect.colliderect(self.down_border) and self.player.rect.bottom >= self.down_border.top:
                 
                 self.movement[1] = False
                 self.player.pos[1] -= 1
+            
+        
 
+            # Obstacle Spawning Logic
+            if pygame.time.get_ticks() - self.last_spawn >= self.spawn_delay:
+                self.obstacle_spawn = random.randint(300, 400)
+                new_obstacle = Obstacle(self, "obstacle", (self.screen.get_width(), self.obstacle_spawn), (75, 75))
+                new_obstacle.convert((80,80), "obstacle", (181, 174, 154))
+                self.obstacles.append(new_obstacle)
+                self.last_spawn = pygame.time.get_ticks()
+            
+            # Render Obstacles
+            for obstacle in self.obstacles[:]:
+                obstacle.update((-self.speed, 0))
+                obstacle.render(self.screen, rect = True)
+
+                # Remove obstacles if off screen
+                if obstacle.rect.right < 0:
+                    self.obstacles.remove(obstacle)    
+
+                if self.player.rect.colliderect(obstacle.rect):
+                    obstacle.render(self.screen, rect = True, collision = True)
+                    
+            
+            # Collision Mechanics
+            
 
             # --- Movement mechanics ---
             for event in pygame.event.get():

@@ -26,11 +26,13 @@ class PhysicsEntity:
         self.rect.size = new_size
 
 class Obstacle:
-    def __init__(self, size, position, image):
+    def __init__(self, game, sprite_key, position, size):
+        self.game = game
         self.position = list(position)
-        self.image = self.game.assets["obstacle"]
-        self.rect = pygame.Rect(self.position[0], self.pos[1], self.size[0], self.size[1])
         self.size = size
+        self.image = self.game.assets[sprite_key]
+        self.rect = pygame.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
+        
     
     def update(self, hole_movement = (0, 0)):
         frame_movement = (hole_movement[0] , hole_movement[1])
@@ -40,5 +42,14 @@ class Obstacle:
 
         self.rect.topleft = (self.position[0], self.position[1])
     
-    def render(self, surf):
+    def render(self, surf, collision = False, rect = False):
         surf.blit(self.image, self.position)
+        if rect == True:
+            pygame.draw.rect(surf, (0,255,0), self.rect)
+            if collision == True:
+                pygame.draw.rect(surf, (255, 0, 0), self.rect)
+    
+    def convert(self, new_size, sprite_key, colour_key):
+        self.image = pygame.transform.scale(self.game.assets[sprite_key], new_size)
+        self.rect.size = new_size
+        self.image.set_colorkey(colour_key)
