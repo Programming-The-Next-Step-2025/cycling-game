@@ -10,14 +10,12 @@ SCREEN_NAME = "Tourist Bowling"
 SPEED = 3
 SPAWN_POSITION = (200, 350)
 SCREEN_BACKGROUND_COLOUR = (125, 125, 125)
-
 # ---------------------------
 
 #Defining game class
 class Game:
 
     def __init__(self):
-
         pygame.init()
         self.screen = pygame.display.set_mode(WINDOW_SIZE, pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.SCALED, vsync=1)
 
@@ -30,10 +28,10 @@ class Game:
         # -- Assets Library -- 
         self.assets = {
             "player": load_image("player.png"),
-            "background": load_image("background.png"),
+            "background": load_image("background_3.png"),
             "obstacle": load_image("obstacle_rm.png")
         }
-        
+
         self.bg = pygame.transform.scale(self.assets["background"], self.screen.get_size())
         self.player = PhysicsEntity(self, "player", SPAWN_POSITION, (8,15))
         self.player.scale((90, 90))
@@ -43,6 +41,7 @@ class Game:
         self.back_movement = [False, False]
         self.back_position = [0, 0]
 
+        # Upper & Lower Border 
         self.up_border = pygame.Rect(0, 320, self.screen.get_width(), 10)
         self.down_border = pygame.Rect(0, (self.screen.get_height() - 2), self.screen.get_width(), 1)
 
@@ -84,43 +83,55 @@ class Game:
                 self.last_speed_increase_time = pygame.time.get_ticks()
             
             self.player.update((0, (self.movement[1] - self.movement[0]) * SPEED))
-            self.player.render(self.screen)
+            #self.player.render(self.screen)
             
-            # Keeping the player in bound
-            if self.player.rect.colliderect(self.up_border) and self.player.rect.bottom <= (self.up_border.bottom + 10):
-                
-                self.movement[0] = False
-                self.player.pos[1] += 1
-            if self.player.rect.colliderect(self.down_border) and self.player.rect.bottom >= self.down_border.top:
-                
-                self.movement[1] = False
-                self.player.pos[1] -= 1
+           
             
         
 
             # Obstacle Spawning Logic
             if pygame.time.get_ticks() - self.last_spawn >= self.spawn_delay:
-                self.obstacle_spawn = random.randint(300, 400)
+                self.obstacle_spawn = random.choice([360, 405])
                 new_obstacle = Obstacle(self, "obstacle", (self.screen.get_width(), self.obstacle_spawn), (75, 75))
                 new_obstacle.convert((80,80), "obstacle", (181, 174, 154))
+                if new_obstacle.position[1] == 360:
+                    new_obstacle.layer = "front" # Front: Top layer
+                if new_obstacle.position[1] == 405:
+                    new_obstacle.layer = "behind" # Behind: Bottom layer
                 self.obstacles.append(new_obstacle)
                 self.last_spawn = pygame.time.get_ticks()
             
-            # Render Obstacles
-            for obstacle in self.obstacles[:]:
+          
+            #                                    === RENDERING ===
+
+            for obstacle in self.obstacles:
                 obstacle.update((-self.speed, 0))
-                obstacle.render(self.screen, rect = True)
 
-                # Remove obstacles if off screen
-                if obstacle.rect.right < 0:
-                    self.obstacles.remove(obstacle)    
+            # Combine player and obstacles and sort by vertical position
+            renderables = self.obstacles + [self.player]
+            renderables.sort(key = get_y)
 
+            for entity in renderables:
+                entity.render(self.screen)
+            
+            for obstacle in self.obstacles:
                 if self.player.rect.colliderect(obstacle.rect):
-                    obstacle.render(self.screen, rect = True, collision = True)
-                    
+                    obstacle.render(self.screen, rect=True, collision=True)
             
-            # Collision Mechanics
+            self.obstacles = [obs for obs in self.obstacles if obs.rect.right >= 0]
+
+            # =================================================================
+
+
             
+            # Keeping the player in bound
+            if self.player.rect.colliderect(self.up_border) and self.player.rect.bottom <= (self.up_border.bottom + 10):
+                self.movement[0] = False
+                self.player.pos[1] += 1
+
+            if self.player.rect.colliderect(self.down_border) and self.player.rect.bottom >= self.down_border.top:
+                self.movement[1] = False
+                self.player.pos[1] -= 1
 
             # --- Movement mechanics ---
             for event in pygame.event.get():
