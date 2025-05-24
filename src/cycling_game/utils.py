@@ -1,12 +1,16 @@
 import pygame
+from pathlib import Path
 
-BASE_IMG_PATH = "/Users/felixhofer/Documents/GitHub/cycling-game/src/cycling_game/Resources/Images/"
+
+BASE_DIR = Path(__file__).resolve().parent
+ASSETS_DIR = BASE_DIR / "Resources"
+BASE_IMG_PATH = ASSETS_DIR / "Images" 
 
 def load_image(path):
     """
     
     """
-    img = pygame.image.load(BASE_IMG_PATH + path).convert_alpha()
+    img = pygame.image.load(BASE_IMG_PATH / path).convert_alpha()
     return img
 
 
@@ -25,4 +29,6 @@ def adjust_rectangle_pos(sprite_image, position, adjustment = (0, 0)):
 
 def get_y(obj):
     return obj.rect.bottom
+
+
     

@@ -1,8 +1,19 @@
 import pygame
+import os
 import sys
+from pathlib import Path
 from cycling_game.entities import *
 from cycling_game.utils import *
 import random
+
+# --- Directories ---
+BASE_DIR = Path(__file__).resolve().parent
+ASSETS_DIR = BASE_DIR / "Resources"
+FONT_PATH = ASSETS_DIR / "Font" / "PressStart2P-Regular.ttf"
+HIGHSCORE_FILE = BASE_DIR / "highscore.txt"
+# -------------------
+
+
 # -------- Settings ---------
 FRAMERATE = 60
 WINDOW_SIZE = (1000, 480)
@@ -16,12 +27,11 @@ SCREEN_BACKGROUND_COLOUR = (125, 125, 125)
 class Game:
 
     def __init__(self):
+        
+        # Basic Inits and screen creation
         pygame.init()
+        pygame.font.init()
         self.screen = pygame.display.set_mode(WINDOW_SIZE, pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.SCALED, vsync=1)
-
-        #Scale up the screen to scale the sprites
-        #self.display = pygame.Surface(scale_screen_up(1, window_size = WINDOW_SIZE))
-
         self.clock = pygame.time.Clock()
         pygame.display.set_caption(SCREEN_NAME)
         
@@ -58,8 +68,9 @@ class Game:
         # Spacing between obstacles
         self.spawn_delay = 2500
 
-        
-        
+        self.score = 0
+        self.score_increment = 1
+    
 
     #Creating the game loop as a function of the game class
     def run(self):
@@ -82,6 +93,14 @@ class Game:
             if abs(self.scroll) >= self.bg.get_width():
                 self.scroll = 0
             
+            
+            # === Score Increment ===
+            self.font = pygame.font.Font(FONT_PATH, 15)
+            self.score += self.score_increment
+            self.score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
+            self.screen.blit(self.score_text, (820, 10))
+
+
 
             # === DIFFICULTY MECHANICS ===
 
@@ -93,7 +112,6 @@ class Game:
                 self.last_speed_increase_time = pygame.time.get_ticks()
                 
             # =============================
-
 
             # Obstacle Spawning Logic
             if pygame.time.get_ticks() - self.last_spawn >= self.spawn_delay:
