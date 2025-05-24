@@ -25,4 +25,4 @@ def adjust_rectangle_pos(sprite_image, position, adjustment = (0, 0)):
 
 def get_y(obj):
     return obj.rect.bottom
-
+    

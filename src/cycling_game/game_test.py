@@ -7,7 +7,7 @@ import random
 FRAMERATE = 60
 WINDOW_SIZE = (1000, 480)
 SCREEN_NAME = "Tourist Bowling"
-SPEED = 3
+SPEED = 4
 SPAWN_POSITION = (200, 350)
 SCREEN_BACKGROUND_COLOUR = (125, 125, 125)
 # ---------------------------
@@ -29,7 +29,8 @@ class Game:
         self.assets = {
             "player": load_image("player.png"),
             "background": load_image("background_3.png"),
-            "obstacle": load_image("obstacle_rm.png")
+            "pothole": load_image("obstacle_rm.png"),
+            "construction": load_image("construction.png")
         }
 
         self.bg = pygame.transform.scale(self.assets["background"], self.screen.get_size())
@@ -47,14 +48,17 @@ class Game:
 
         # Create the endless background animation
         self.scroll = 0
-        self.speed = 1
+        self.speed = 2
         self.start_time = pygame.time.get_ticks()
         self.last_speed_increase_time = self.start_time
 
         # Spawn in Obstacles, dependent on time interval
         self.obstacles = []
         self.last_spawn = pygame.time.get_ticks()
-        self.spawn_delay = 5000
+        # Spacing between obstacles
+        self.spawn_delay = 2500
+
+        
         
 
     #Creating the game loop as a function of the game class
@@ -65,6 +69,7 @@ class Game:
             
             self.screen.fill(SCREEN_BACKGROUND_COLOUR)
 
+            # Endless Background Animation
             num_tiles = self.screen.get_width() // self.bg.get_width() + 2
 
             for i in range(num_tiles):
@@ -77,46 +82,53 @@ class Game:
             if abs(self.scroll) >= self.bg.get_width():
                 self.scroll = 0
             
-            
+
+            # === DIFFICULTY MECHANICS ===
+
+            #Increase scrolling speed & spawn delay of background
             if pygame.time.get_ticks() - self.last_speed_increase_time >= 10000:
-                self.speed += 1
+                self.speed += 0.5
+                if self.spawn_delay > 1000:
+                    self.spawn_delay -= 100
                 self.last_speed_increase_time = pygame.time.get_ticks()
-            
-            self.player.update((0, (self.movement[1] - self.movement[0]) * SPEED))
-            #self.player.render(self.screen)
-            
-           
-            
-        
+                
+            # =============================
+
 
             # Obstacle Spawning Logic
             if pygame.time.get_ticks() - self.last_spawn >= self.spawn_delay:
-                self.obstacle_spawn = random.choice([360, 405])
-                new_obstacle = Obstacle(self, "obstacle", (self.screen.get_width(), self.obstacle_spawn), (75, 75))
-                new_obstacle.convert((80,80), "obstacle", (181, 174, 154))
-                if new_obstacle.position[1] == 360:
-                    new_obstacle.layer = "front" # Front: Top layer
-                if new_obstacle.position[1] == 405:
-                    new_obstacle.layer = "behind" # Behind: Bottom layer
+                
+                sprite_key = random.choices(["construction", "pothole"], weights = [1, 3])[0] # 0 because random.choices returns a lsit instead of an int
+                new_obstacle = Obstacle(self, sprite_key, [self.screen.get_width(), int()], (75, 75))
+                if new_obstacle.sprite_key == "pothole":
+                    spawn_y = random.choice([360, 405])
+                    new_obstacle.pos[1] = spawn_y
+                    new_obstacle.convert((80, 80), sprite_key)
+                if new_obstacle.sprite_key == "construction":
+                    spawn_y = 340
+                    new_obstacle.pos[1] = spawn_y
+                    new_obstacle.convert((150, 150), sprite_key)
                 self.obstacles.append(new_obstacle)
                 self.last_spawn = pygame.time.get_ticks()
-            
+                
           
-            #                                    === RENDERING ===
+            #                      === RENDERING ===
+            self.player.update((0, (self.movement[1] - self.movement[0]) * SPEED))
 
             for obstacle in self.obstacles:
                 obstacle.update((-self.speed, 0))
 
             # Combine player and obstacles and sort by vertical position
+            
+            
             renderables = self.obstacles + [self.player]
-            renderables.sort(key = get_y)
-
+            renderables.sort(key=lambda obj: (obj.rect.bottom, id(obj)))
             for entity in renderables:
                 entity.render(self.screen)
-            
+
             for obstacle in self.obstacles:
                 if self.player.rect.colliderect(obstacle.rect):
-                    obstacle.render(self.screen, rect=True, collision=True)
+                    print("Collision")
             
             self.obstacles = [obs for obs in self.obstacles if obs.rect.right >= 0]
 

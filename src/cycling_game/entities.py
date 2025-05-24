@@ -33,7 +33,10 @@ class PhysicsEntity:
         self.pos[0] += frame_movement[0]
         self.pos[1] += frame_movement[1]
 
-        self.rect.topleft = adjust_rectangle_pos(self.image, self.pos, (0.15, 0.6))
+        self.rect.midbottom = (
+            self.pos[0] + self.image.get_width() * 0.5,
+            self.pos[1] + self.image.get_height() * 0.95
+        )
 
     def render(self, surf):
         surf.blit(self.image, self.pos)
@@ -47,34 +50,37 @@ class PhysicsEntity:
         self.rect.size = new_size[0] * 0.72, new_size[1] * 0.35
 
 class Obstacle:
-    def __init__(self, game, sprite_key, position, size):
+    def __init__(self, game, sprite_key, pos, size):
         self.game = game
-        self.position = list(position)
+        self.pos = list(pos)
         self.size = size
         self.image = self.game.assets[sprite_key]
-        self.rect = pygame.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
+        self.rect = pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
         self.layer = str()
+        self.sprite_key = sprite_key
     
     def update(self, hole_movement = (0, 0)):
         frame_movement = (hole_movement[0] , hole_movement[1])
 
-        self.position[0] += frame_movement[0]
-        self.position[1] += frame_movement[1]
+        self.pos[0] += frame_movement[0]
+        self.pos[1] += frame_movement[1]
 
-        self.rect.topleft = adjust_rectangle_pos(self.image, self.position, adjustment = (0.05, 0.45))
+        self.rect.midbottom = (
+            self.pos[0] + self.image.get_width() * 0.5,
+            self.pos[1] + self.image.get_height() * 0.95
+        )
 
         
     def render(self, surf, collision = False, rect = False):
-        surf.blit(self.image, self.position)
-        if rect == True:
-            pygame.draw.rect(surf, (0,255,0), self.rect)
-            if collision == True:
-                pygame.draw.rect(surf, (255, 0, 0), self.rect)
-    
-    def convert(self, new_size, sprite_key, colour_key):
+        surf.blit(self.image, self.pos)
+        #if rect == True:
+        #pygame.draw.rect(surf, (0,255,0), self.rect)
+        if collision == True:
+            pygame.draw.rect(surf, (255, 0, 0), self.rect)
+
+    def convert(self, new_size, sprite_key):
         self.image = pygame.transform.scale(self.game.assets[sprite_key], new_size)
         self.rect.size = new_size
-        self.image.set_colorkey(colour_key)
         self.rect.size = new_size[0] * 0.9, new_size[1] * 0.4
 
     
