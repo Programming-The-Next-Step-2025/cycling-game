@@ -47,6 +47,7 @@ class Game:
             "pothole": load_image("obstacle_rm.png"),
             "construction": load_image("construction.png"),
             "tourist": load_image("tourist.png"),
+            "bikestand": load_image("bikestand.png"),
             "local": load_image("local.png")
         }
         self.sounds = {
@@ -79,7 +80,7 @@ class Game:
         self.spawn = False
         self.last_spawn = pygame.time.get_ticks()
         # Spacing between obstacles
-        self.spawn_delay = random.randint(1000, 2000)
+        self.spawn_delay = random.randint(800, 1500)
         #Tourist Spawning
         self.tourist_spawn = pygame.time.get_ticks()
 
@@ -156,10 +157,10 @@ class Game:
 
             if self.spawn == True:
                 if self.score < 1000:
-                    weights = [1, 5, 2, 10]
+                    weights = [1, 5, 2, 4, 4]
                 else:
-                    weights = [2, 4, 1, 2]
-                sprite_key = random.choices(["construction", "pothole", "tourist", "local"], weights = weights)[0]
+                    weights = [2, 4, 1, 2, 4]
+                sprite_key = random.choices(["construction", "pothole", "tourist", "local", "bikestand"], weights = weights)[0]
                 lanes = [350, 340, 405]
                 new_obstacle = Obstacle(self, sprite_key, [self.screen.get_width(), 0], (75, 75))
 
@@ -180,7 +181,13 @@ class Game:
                     new_obstacle.pos[1] = spawn_y
                     new_obstacle.convert((85, 85), sprite_key)
                     self.obstacles.append(new_obstacle)
-                
+
+                elif sprite_key == "bikestand":
+                    spawn_y = 300
+                    new_obstacle.pos[1] = spawn_y
+                    new_obstacle.convert((130, 130), sprite_key)
+                    self.obstacles.append(new_obstacle)
+
                 elif sprite_key == "local":
                     possible_lanes = [y for y in lanes if is_lane_empty(self, y)]
                     if possible_lanes:
@@ -194,7 +201,7 @@ class Game:
                 self.last_spawn = pygame.time.get_ticks()
                 self.spawn = False
                 
-          
+                
             #                      === RENDERING ===
             if not self.player.explosion_done:
                 self.player.update((0, (self.movement[1] - self.movement[0]) * SPEED))

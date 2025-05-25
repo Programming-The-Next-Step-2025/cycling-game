@@ -85,7 +85,12 @@ class Obstacle:
             self.last_update = pygame.time.get_ticks()
             self.framerate = 60
             self.image = self.animation[self.current_frame]
-
+        if sprite_key == "tourist":
+            self.animation = get_animation_list("Tourist")
+            self.current_frame = 0
+            self.last_update = pygame.time.get_ticks()
+            self.framerate = 60
+            self.image = self.animation[self.current_frame]
     def update(self, hole_movement = (0, 0)):
 
         if self.sprite_key in ["construction", "pothole"]:
@@ -95,7 +100,14 @@ class Obstacle:
             self.pos[1] += frame_movement[1]
 
         if self.sprite_key == "tourist":
-            self.pos[0] -= 4
+            self.pos[0] -= 8
+            now = pygame.time.get_ticks()
+        
+            if now - self.last_update > self.framerate:
+                self.last_update = now
+                self.current_frame = (self.current_frame + 1) % len(self.animation)
+                self.image = self.animation[self.current_frame]
+            
 
         if self.sprite_key == "local":
             now = pygame.time.get_ticks()
@@ -104,18 +116,25 @@ class Obstacle:
                 self.last_update = now
                 self.current_frame = (self.current_frame + 1) % len(self.animation)
                 self.image = self.animation[self.current_frame]
-            self.pos[0] += (self.game.speed + 1)
+            self.pos[0] += (self.game.speed)
 
-        self.rect.midbottom = (
+        if self.sprite_key == "bikestand":
+            self.pos[0] += hole_movement[0]
+            self.pos[1] += hole_movement[1]
+            self.rect.midbottom = (
                 self.pos[0] + self.image.get_width() * 0.5,
-                self.pos[1] + (self.image.get_height()- 5) 
+                self.pos[1] + (self.image.get_height() - 50)
             )
-
+        else:
+            self.rect.midbottom = (
+                self.pos[0] + self.image.get_width() * 0.5,
+                self.pos[1] + (self.image.get_height() - 5)
+            )
         
     def render(self, surf, collision = False, rect = False):
         surf.blit(self.image, self.pos)
         #if rect == True:
-        #pygame.draw.rect(surf, (0,255,0), self.rect, border_radius = 10)
+        pygame.draw.rect(surf, (0,255,0), self.rect, border_radius = 10)
         if collision == True:
             pygame.draw.rect(surf, (255, 0, 0), self.rect)
 
@@ -127,9 +146,13 @@ class Obstacle:
         if sprite_key == "construction":
             self.rect.size = new_size[0] * 0.8, new_size[1] * 0.6
         if sprite_key == "tourist":
+            self.animation = [pygame.transform.scale(frame, new_size) for frame in self.animation]
             self.rect.size = new_size[0] * 0.8, new_size[1] * 0.6
+            self.image = self.animation[self.current_frame]
+        if sprite_key == "bikestand":
+            self.rect.size = new_size[0] * 0.9, new_size[1] * 0.3
+            
         if sprite_key == "local":
             self.animation = [pygame.transform.scale(frame, new_size) for frame in self.animation]
             self.rect.size = new_size[0] * 0.8, new_size[1] * 0.2
             self.image = self.animation[self.current_frame]
-
