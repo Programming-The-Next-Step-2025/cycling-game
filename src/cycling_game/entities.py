@@ -26,7 +26,7 @@ class PhysicsEntity:
             self.last_update = now
             self.current_frame = (self.current_frame + 1) % len(self.animation)
             self.image = self.animation[self.current_frame]
-
+        
         # Update the player movement
         frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1])
 
@@ -41,7 +41,7 @@ class PhysicsEntity:
     def render(self, surf):
         surf.blit(self.image, self.pos)
         # Comment next line for testing
-        #pygame.draw.rect(surf, (0,0,100), self.rect)
+        pygame.draw.rect(surf, (0,0,100), self.rect, border_radius = 10)
 
     def scale(self, new_size):
         self.animation = [pygame.transform.scale(frame, new_size) for frame in self.animation]
@@ -60,27 +60,41 @@ class Obstacle:
         self.sprite_key = sprite_key
     
     def update(self, hole_movement = (0, 0)):
-        frame_movement = (hole_movement[0] , hole_movement[1])
+        if self.sprite_key == "construction" or "pothole":
+            frame_movement = (hole_movement[0] , hole_movement[1])
 
-        self.pos[0] += frame_movement[0]
-        self.pos[1] += frame_movement[1]
+            self.pos[0] += frame_movement[0]
+            self.pos[1] += frame_movement[1]
+
+        if self.sprite_key == "tourist":
+            self.pos[0] -= 2
+
+        if self.sprite_key == "local":
+            self.pos[0] += (self.game.speed + 2)
 
         self.rect.midbottom = (
-            self.pos[0] + self.image.get_width() * 0.5,
-            self.pos[1] + self.image.get_height() * 0.95
-        )
+                self.pos[0] + self.image.get_width() * 0.5,
+                self.pos[1] + self.image.get_height() 
+            )
 
         
     def render(self, surf, collision = False, rect = False):
         surf.blit(self.image, self.pos)
         #if rect == True:
-        #pygame.draw.rect(surf, (0,255,0), self.rect)
+        pygame.draw.rect(surf, (0,255,0), self.rect, border_radius = 10)
         if collision == True:
             pygame.draw.rect(surf, (255, 0, 0), self.rect)
 
     def convert(self, new_size, sprite_key):
         self.image = pygame.transform.scale(self.game.assets[sprite_key], new_size)
         self.rect.size = new_size
-        self.rect.size = new_size[0] * 0.9, new_size[1] * 0.4
+        if sprite_key == "pothole":
+            self.rect.size = new_size[0] * 0.9, new_size[1] * 0.5
+        if sprite_key == "construction":
+            self.rect.size = new_size[0] * 0.8, new_size[1] * 0.6
+        if sprite_key == "tourist":
+            self.rect.size = new_size[0] * 0.8, new_size[1] * 0.6
+        if sprite_key == "local":
+            self.rect.size = new_size[0] * 0.8, new_size[1] * 0.3
 
     

@@ -1,10 +1,12 @@
 import pygame
 from pathlib import Path
 
-
+#  --- Directories ---
 BASE_DIR = Path(__file__).resolve().parent
 ASSETS_DIR = BASE_DIR / "Resources"
 BASE_IMG_PATH = ASSETS_DIR / "Images" 
+HIGHSCORE_FILE = BASE_DIR / "highscore.txt"
+
 
 def load_image(path):
     """
@@ -30,5 +32,23 @@ def adjust_rectangle_pos(sprite_image, position, adjustment = (0, 0)):
 def get_y(obj):
     return obj.rect.bottom
 
+def read_highscore():
+    if HIGHSCORE_FILE.exists():
+        try:
+            highscore = int(HIGHSCORE_FILE.read_text().strip())
+            return highscore
+        except:
+            ValueError
+            return 0
+    return 0
 
-    
+def save_highscore(score):
+    HIGHSCORE_FILE.write_text(str(score))
+
+
+def is_lane_empty(game, lane_y, lane_height = 80):
+    lane_rect = pygame.Rect(0, lane_y, game.screen.get_width(), lane_height)
+    for obs in game.obstacles:
+        if obs.rect.colliderect(lane_rect) and obs.rect.right > 0:
+            return False
+    return True
