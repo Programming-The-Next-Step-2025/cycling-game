@@ -1,4 +1,5 @@
 import pygame
+from cycling_game.cache import image_cache
 from pathlib import Path
 
 #  --- Directories ---
@@ -9,11 +10,10 @@ HIGHSCORE_FILE = BASE_DIR / "highscore.txt"
 
 
 def load_image(path):
-    """
-    
-    """
-    img = pygame.image.load(BASE_IMG_PATH / path).convert_alpha()
-    return img
+    if path not in image_cache:
+        full_path = BASE_IMG_PATH / path
+        image_cache[path] = pygame.image.load(full_path).convert_alpha()
+    return image_cache[path]
 
 
 def scale_screen_up(size, window_size = (640, 420)):
@@ -52,3 +52,12 @@ def is_lane_empty(game, lane_y, lane_height = 80):
         if obs.rect.colliderect(lane_rect) and obs.rect.right > 0:
             return False
     return True
+
+def draw_text_with_outline(surface, text, font, pos, text_color, outline_color):
+    x, y = pos
+    outline_positions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # basic cross outline
+    for dx, dy in outline_positions:
+        outline_surface = font.render(text, True, outline_color)
+        surface.blit(outline_surface, (x + dx, y + dy))
+    text_surface = font.render(text, True, text_color)
+    surface.blit(text_surface, (x, y))

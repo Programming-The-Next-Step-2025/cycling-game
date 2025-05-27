@@ -1,6 +1,7 @@
 import pygame
 from cycling_game.animation import get_animation_list
 from cycling_game.animation import explosion_animation_list
+from cycling_game.animation import get_blood_animation_list
 from cycling_game.utils import *
 
 class PhysicsEntity:
@@ -10,7 +11,7 @@ class PhysicsEntity:
         self.pos = list(pos) 
         self.size = size
         self.velocity = [0, 0]
-
+       
         self.animation = get_animation_list("Player")
         self.current_frame = 0
         self.last_update = pygame.time.get_ticks()
@@ -78,19 +79,45 @@ class Obstacle:
         self.rect = pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
         self.layer = str()
         self.sprite_key = sprite_key
-
+        self.stopped = False
+        self.last_update = pygame.time.get_ticks()
+        self.framerate = 60
+        
         if sprite_key == "local":
             self.animation = get_animation_list("Local")
             self.current_frame = 0
-            self.last_update = pygame.time.get_ticks()
-            self.framerate = 60
             self.image = self.animation[self.current_frame]
+
+            self.exploding = False
+            self.explosion_done = False
+            self.explosion_index = 0
+            self.explosion_frames = get_blood_animation_list()
+
+        if sprite_key == "local_right":
+            self.animation = [pygame.transform.flip(frame, True, False) for frame in get_animation_list("Local")]
+            self.current_frame = 0
+            self.image = self.animation[self.current_frame]
+
+            self.exploding = False
+            self.explosion_done = False
+            self.explosion_index = 0
+            self.explosion_frames = [pygame.transform.flip(frame, True, False) for frame in get_blood_animation_list()]
+
         if sprite_key == "tourist":
             self.animation = get_animation_list("Tourist")
             self.current_frame = 0
-            self.last_update = pygame.time.get_ticks()
-            self.framerate = 60
             self.image = self.animation[self.current_frame]
+            self.exploding = False
+            self.explosion_done = False
+            self.explosion_index = 0
+            self.explosion_frames = get_blood_animation_list()
+
+        if sprite_key == "escooter":
+            self.image = self.game.assets["escooter"]
+            self.exploding = False
+            self.explosion_done = False
+            self.explosion_index = 0
+            self.explosion_frames = get_blood_animation_list()
     def update(self, hole_movement = (0, 0)):
 
         if self.sprite_key in ["construction", "pothole"]:
@@ -100,23 +127,125 @@ class Obstacle:
             self.pos[1] += frame_movement[1]
 
         if self.sprite_key == "tourist":
-            self.pos[0] -= 8
+            if self.explosion_done:
+                return
+
             now = pygame.time.get_ticks()
-        
-            if now - self.last_update > self.framerate:
-                self.last_update = now
-                self.current_frame = (self.current_frame + 1) % len(self.animation)
-                self.image = self.animation[self.current_frame]
-            
+            if self.exploding:
+                if now - self.last_update > self.framerate:
+                    self.last_update = now
+                    if self.explosion_index < len(self.explosion_frames):
+                        self.image = self.explosion_frames[self.explosion_index]
+                        self.explosion_index += 1
+                    else:
+                        self.exploding = False
+                        self.explosion_done = True
+                        self.image = pygame.Surface((0, 0))  
+            else:
+                if now - self.last_update > self.framerate:
+                    self.last_update = now
+                    self.current_frame = (self.current_frame + 1) % len(self.animation)
+                    self.image = self.animation[self.current_frame]
+
+                if not self.stopped:
+                    self.pos[0] -= (self.game.speed) * 0.6
+                if self.stopped:
+                    self.pos[0] += self.game.speed
+            if not self.stopped:
+                self.pos[0] -= (self.game.speed) * 0.6
+            if self.stopped:
+                self.pos[0] -= self.game.speed
+
+        if self.sprite_key == "escooter":
+
+            if self.explosion_done:
+                return
+
+            now = pygame.time.get_ticks()
+            if self.exploding:
+                if now - self.last_update > self.framerate:
+                    self.last_update = now
+                    if self.explosion_index < len(self.explosion_frames):
+                        self.image = self.explosion_frames[self.explosion_index]
+                        self.explosion_index += 1
+                    else:
+                        self.exploding = False
+                        self.explosion_done = True
+                        self.image = pygame.Surface((0, 0))  
+            else:
+                if now - self.last_update > self.framerate:
+                    self.last_update = now
+
+                if not self.stopped:
+                    self.pos[0] -= (self.game.speed) * 1.1
+                if self.stopped:
+                    self.pos[0] -= self.game.speed 
+                    
+            if not self.stopped:
+                self.pos[0] -= (self.game.speed) * 1.1
+            if self.stopped:
+                self.pos[0] -= self.game.speed
 
         if self.sprite_key == "local":
+            if self.explosion_done:
+                return
+
             now = pygame.time.get_ticks()
-        
-            if now - self.last_update > self.framerate:
-                self.last_update = now
-                self.current_frame = (self.current_frame + 1) % len(self.animation)
-                self.image = self.animation[self.current_frame]
-            self.pos[0] += (self.game.speed)
+            if self.exploding:
+                now = pygame.time.get_ticks()
+                if self.exploding:
+                    if now - self.last_update > self.framerate:
+                        self.last_update = now
+                        if self.explosion_index < len(self.explosion_frames):
+                            self.image = self.explosion_frames[self.explosion_index]
+                            self.explosion_index += 1
+                        else:
+                            self.exploding = False
+                            self.explosion_done = True
+                            self.image = pygame.Surface((0, 0))  # Hide local after explosion
+            else:
+                if now - self.last_update > self.framerate:
+                    self.last_update = now
+                    self.current_frame = (self.current_frame + 1) % len(self.animation)
+                    self.image = self.animation[self.current_frame]
+
+                if not self.stopped:
+                    self.pos[0] += (self.game.speed) * 0.4
+                if self.stopped:
+                    self.pos[0] -= self.game.speed
+            
+            if not self.stopped:
+                self.pos[0] += (self.game.speed) * 0.4
+            if self.stopped:
+                self.pos[0] -= self.game.speed
+
+        if self.sprite_key == "local_right":
+            if self.explosion_done:
+                return
+
+            now = pygame.time.get_ticks()
+            if self.exploding:
+                if now - self.last_update > self.framerate:
+                    self.last_update = now
+                    if self.explosion_index < len(self.explosion_frames):
+                        self.image = self.explosion_frames[self.explosion_index]
+                        self.explosion_index += 1
+                    else:
+                        self.exploding = False
+                        self.explosion_done = True
+                        self.image = pygame.Surface((0, 0))  # Hide after explosion
+            else:
+                if now - self.last_update > self.framerate:
+                    self.last_update = now
+                    self.current_frame = (self.current_frame + 1) % len(self.animation)
+                    self.image = self.animation[self.current_frame]
+
+                if not self.stopped:
+                    self.pos[0] -= (self.game.speed) * 1.2
+                if self.stopped:
+                    self.pos[0] += self.game.speed
+
+
 
         if self.sprite_key == "bikestand":
             self.pos[0] += hole_movement[0]
@@ -134,7 +263,7 @@ class Obstacle:
     def render(self, surf, collision = False, rect = False):
         surf.blit(self.image, self.pos)
         #if rect == True:
-        pygame.draw.rect(surf, (0,255,0), self.rect, border_radius = 10)
+        #pygame.draw.rect(surf, (0,255,0), self.rect, border_radius = 10)
         if collision == True:
             pygame.draw.rect(surf, (255, 0, 0), self.rect)
 
@@ -144,15 +273,19 @@ class Obstacle:
         if sprite_key == "pothole":
             self.rect.size = new_size[0] * 0.9, new_size[1] * 0.4
         if sprite_key == "construction":
-            self.rect.size = new_size[0] * 0.8, new_size[1] * 0.6
+            self.rect.size = new_size[0] * 0.8, new_size[1] * 0.55
         if sprite_key == "tourist":
             self.animation = [pygame.transform.scale(frame, new_size) for frame in self.animation]
             self.rect.size = new_size[0] * 0.8, new_size[1] * 0.6
             self.image = self.animation[self.current_frame]
         if sprite_key == "bikestand":
-            self.rect.size = new_size[0] * 0.9, new_size[1] * 0.3
+            self.rect.size = new_size[0] * 0.9, new_size[1] * 0.4
             
         if sprite_key == "local":
             self.animation = [pygame.transform.scale(frame, new_size) for frame in self.animation]
             self.rect.size = new_size[0] * 0.8, new_size[1] * 0.2
             self.image = self.animation[self.current_frame]
+        
+        if sprite_key == "escooter":
+            self.rect.size = new_size[0] * 0.8, new_size[1] * 0.6
+   
