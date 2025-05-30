@@ -66,29 +66,29 @@ the docs folder (see below) for more detailed instructions
 # Folder Structure
 Here an overview of the general project structure:  
 
-cycling-game/
-├── dist/                --> App/.exe files after PyInstaller build
-├── docs/                --> Vignette in Jupyter NB form
-├── Executables/         --> Pre-built macOS/Windows executables
-│   └── MacOS/   
-│   └── Windows/   
-├── src/                 --> Source code package (cycling_game/)
-│   └── cycling_game/   
-│       ├── game_test.py    --> The game classes and main code
-│       ├── utils.py        --> Functions for loading assets
-│       ├── animation.py    --> Functions for creating animation lists
-│       ├── entities.py     --> The player and obstacle classes
-│       ├── cache.py        --> Contains animation and sprite caches
-│       ├── run.py          --> Contains the run_game function
-│       └── highscore.txt   --> Contains the highscore
-│           └── Resources/          --> Contains all the assets
-│               ├── Images/         --> Contains all sprites and animations
-│               ├── Font/           --> Contains the font 
-│               └── Sounds/         --> Contains game sound
-├── LICENSE              --> MIT License
-├── README.md            
-├── requirements.txt     --> PIP dependencies
-├── pyproject.toml       --> Project metadata
+cycling-game/  
+├── dist/                --> App/.exe files after PyInstaller build  
+├── docs/                --> Vignette in Jupyter NB form  
+├── Executables/         --> Pre-built macOS/Windows executables  
+│   └── MacOS/    
+│   └── Windows/    
+├── src/                 --> Source code package (cycling_game/)  
+│   └── cycling_game/     
+│       ├── game_test.py    --> The game classes and main code  
+│       ├── utils.py        --> Functions for loading assets  
+│       ├── animation.py    --> Functions for creating animation lists  
+│       ├── entities.py     --> The player and obstacle classes  
+│       ├── cache.py        --> Contains animation and sprite caches  
+│       ├── run.py          --> Contains the run_game function  
+│       └── highscore.txt   --> Contains the highscore  
+│           └── Resources/          --> Contains all the assets  
+│               ├── Images/         --> Contains all sprites and animations  
+│               ├── Font/           --> Contains the font   
+│               └── Sounds/         --> Contains game sound  
+├── LICENSE              --> MIT License  
+├── README.md              
+├── requirements.txt     --> PIP dependencies  
+├── pyproject.toml       --> Project metadata  
 
 
 ## License
