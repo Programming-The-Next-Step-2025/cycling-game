@@ -1,5 +1,12 @@
-from .example import greet
-from .example import scale_screen_up
-from .example import load_image
-from .entities import *
-import pygame
+from .utils import (
+    load_image,
+    scale_screen_up,
+    adjust_rectangle_pos,
+    get_y,
+    read_highscore,
+    save_highscore,
+    is_lane_empty,
+    draw_text_with_outline
+)
+
+from .entities import PhysicsEntity, Obstacle

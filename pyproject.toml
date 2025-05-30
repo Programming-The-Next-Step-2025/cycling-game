@@ -11,16 +11,19 @@ version = "0.0.1"
 authors = [
   { name="Felix Hofer", email="felix_hofer@gmx.de" },
 ]
-description = "A small arcade style game"
+description = "Bicycle-based side-scroller game"
 readme = "README.md"
 requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-license = "MIT"
-license-files = ["LICEN[CS]E*"]
 
 dependencies = [
-    "pygame"
+    "pygame==2.6.1"
 ]
+
+[project.scripts]
+cycling_game_run = "cycling_game.run:run_game"
