@@ -30,7 +30,7 @@ Mistake will be fixed in future iterations!
 1. Clone the repository: 
 
 ```bash
-git clone https://github.com/Felix-Hofer/cycling-game.git your_folder_name
+git clone https://github.com/Programming-The-Next-Step-2025/cycling-game.git your_folder_name
 cd cycling-game #Change directories to where you cloned the repository
 ``` 
 
