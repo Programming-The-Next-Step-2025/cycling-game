@@ -21,6 +21,8 @@ Next, start the game by executing the .exe / .app file.
 Given, the development stage of this game, your operating system might  
 flag this as malware. To start the game regardless, you have to bypass the  
 firewall (No trojans, I promise hehe).
+Note: Due to a mistake when creating the Windows .exe the highscore system is not working properly.
+Mistake will be fixed in future iterations!
 
 
 ## Manual Installation
